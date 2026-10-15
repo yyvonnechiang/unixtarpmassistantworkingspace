@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>行政秘書工作版</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+:root{--bg:#eef1f6;--card:#fff;--tx:#0f1b2d;--mut:#5a6b85;--bd:#d9e0eb;--nav:#0a1f44;--pri:#0a1f44;--ac:#2e6be6;--danger:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1424;--card:#11213a;--tx:#e6ecf7;--mut:#8fa0bc;--bd:#22365a;--nav:#07111f;--pri:#2e6be6;--ac:#6d9bff;--danger:#ff7a6b}}
+:root[data-theme="dark"]{--bg:#0a1424;--card:#11213a;--tx:#e6ecf7;--mut:#8fa0bc;--bd:#22365a;--nav:#07111f;--pri:#2e6be6;--ac:#6d9bff;--danger:#ff7a6b}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.5}
+header{background:var(--nav);color:#fff;padding:0 20px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.brand{font-weight:600;letter-spacing:.04em;padding:14px 0}
+.brand small{display:block;font-size:.65rem;font-weight:400;color:#8fa6cf;letter-spacing:.18em}
+#nav{display:flex;gap:2px;overflow-x:auto}
+#nav button{background:none;border:0;border-bottom:2px solid transparent;border-radius:0;color:#a9b9d6;padding:18px 14px 14px}
+#nav button.on{color:#fff;border-bottom-color:#4f86f7;background:rgba(255,255,255,.07)}
+main{max-width:1000px;margin:0 auto;padding:24px 20px}
+h1{font-size:1.5rem;margin:2px 0 18px;font-weight:600}
+.eb{font-size:.7rem;letter-spacing:.18em;color:var(--ac);font-weight:600}
+button{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:6px;padding:8px 14px}
+button.pri{background:var(--pri);color:#fff;border-color:var(--pri)}
+button.del{color:var(--danger)}
+input,select,textarea{font:inherit;width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--tx)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.hc{text-align:left;display:grid;gap:4px;padding:22px;border-radius:8px;border:1px solid var(--bd);border-top:3px solid var(--pri)}
+.hc:hover{border-color:var(--ac)}
+.ht{font-size:1.2rem;font-weight:600}
+.hd{color:var(--mut);font-size:.88rem}
+.hn{font-size:2rem;font-weight:600;margin-top:12px;color:var(--ac)}
+.hn small{font-size:.85rem;color:var(--mut);font-weight:400}
+.top{display:flex;gap:10px;margin-bottom:12px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.cnt{color:var(--mut);font-size:.85rem;margin-bottom:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:14px}
+.hd2{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.name{font-weight:600}
+.tag{font-size:.72rem;padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--ac);border:1px solid var(--bd);white-space:nowrap}
+.row{display:flex;gap:8px;font-size:.9rem;margin-top:4px;word-break:break-all}
+.row b{color:var(--mut);font-weight:400;min-width:4.2em}
+.row a{color:var(--ac);text-decoration:none}
+.note b{display:block;color:var(--mut);font-weight:500;font-size:.78rem;margin-bottom:2px}
+.note{margin-top:8px;padding:8px 10px;background:var(--bg);border-radius:6px;font-size:.88rem;white-space:pre-wrap}
+.acts{display:flex;gap:8px;margin-top:10px}
+.acts button{padding:4px 12px;font-size:.84rem}
+.empty{grid-column:1/-1;text-align:center;color:var(--mut);padding:40px 0}
+dialog{border:none;border-radius:10px;padding:0;width:min(520px,94vw);max-height:92vh;background:var(--card);color:var(--tx)}
+dialog::backdrop{background:rgba(5,12,28,.6)}
+.f{padding:18px;display:grid;gap:10px}
+.f h3{margin:0}
+.f label{font-size:.84rem;color:var(--mut);display:grid;gap:4px}
+.bar{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.rm{background:var(--card);border:1px solid var(--bd);border-top:3px solid var(--ac);border-radius:8px;padding:16px;margin-bottom:16px;display:grid;gap:10px}.rm button{justify-self:start}.rt{font-weight:600;margin:4px 0}.ri{display:flex;justify-content:space-between;gap:12px;font-size:.92rem;padding:4px 0;border-bottom:1px solid var(--bd)}.ri span:last-child{color:var(--mut)}.tag.hot{background:var(--pri);color:#fff;border-color:var(--pri)}
+
+body.locked header,body.locked main,body.locked #stw{display:none}
+#lock{display:none}
+body.locked #lock{display:grid}
+#lock{min-height:100vh;place-items:center;background:var(--nav);padding:20px}
+.lk{background:var(--card);color:var(--tx);border-radius:10px;padding:28px;width:min(400px,100%);display:grid;gap:12px}
+.lk h2{margin:0}
+.lk p{margin:0;color:var(--mut);font-size:.88rem}
+#lkmsg{color:var(--danger);font-size:.88rem;min-height:1.2em}
+.hbtn{margin-left:auto;display:flex;gap:8px}
+.hbtn button{background:none;color:#a9b9d6;border-color:#2c4a7c;padding:6px 12px}
+.sset{display:grid;gap:8px;border-top:1px solid var(--bd);padding-top:12px}
+.sset p{margin:0;color:var(--mut);font-size:.84rem}
+#st{color:var(--mut);font-size:.78rem;margin-top:16px}
+</style>
+</head>
+<body class="locked">
+<div id="lock"></div>
+<header><div class="brand">行政秘書工作版<small>EXECUTIVE ASSISTANT</small></div><nav id="nav"></nav><div class="hbtn"><button id="bset">設定</button></div></header>
+<main id="main"></main>
+<dialog id="dlg"><div class="f" id="fb"></div></dialog>
+<dialog id="sdlg"><div class="f" id="sfb"></div></dialog>
+<div id="stw" style="max-width:1000px;margin:0 auto;padding:0 20px 20px"><div id="st"></div></div>
+<script>
+(function(){
+var F1=[["name","姓名（業務／聯絡窗口）"],["company","公司名稱"],["title","職位"],["phone","聯絡電話","tel"],["email","Email","email"],["addr","地址"],["line","Line ID"],["bank","匯款銀行"],["acctName","戶名"],["acctNo","帳號"],["note","注意事項","area"]];
+var F2=[["name","SOP 名稱"],["scene","適用情境"],["steps","作業步驟","area"],["owner","負責人／窗口"],["updated","最後更新日期","date"],["note","注意事項","area"]];
+var SEC={
+contacts:{t:"通訊錄",e:"CONTACTS",d:"業務與聯絡窗口",tabs:{"公司":F1,"私人":F1,"扶輪社":F1,"餐廳/飯店":F1}},
+personal:{t:"部門資料",e:"PERSONAL",d:"會員資料、銀行帳戶",tabs:{
+"會員資料":[["name","會員名稱／組織"],["person","姓名"],["memberNo","會員編號"],["account","登入帳號"],["expiry","有效期限","date"],["note","備註","area"]],
+"銀行帳戶":[["name","帳戶名稱／用途"],["bank","銀行"],["branch","分行"],["acctName","戶名"],["acctNo","帳號"],["note","備註","area"]]}},
+company:{t:"公司資料",e:"COMPANY",d:"公司統編、廠商聯絡、行銷來信",tabs:{
+"公司統編":[["name","公司名稱"],["taxId","統一編號"],["owner","負責人"],["addr","地址"],["phone","電話","tel"],["note","備註","area"]],
+"廠商聯絡方式":[["name","廠商名稱"],["contact","聯絡人"],["phone","電話","tel"],["email","Email","email"],["addr","地址"],["note","備註","area"]],
+"行銷來信":[["name","寄件單位／來源"],["contact","聯絡人"],["email","Email","email"],["phone","電話","tel"],["date","來信日期","date"],["subject","來信主旨"],["note","內容摘要／備註","area"]]}},
+annual:{t:"每年例行性工作",e:"ANNUAL",d:"每年固定工作與月份提醒",sort:"month",tabs:{"例行工作":[["name","工作名稱"],["month","月份","month"],["deadline","期限／日期說明"],["owner","負責單位／相關對象"],["note","說明／備註","area"]]}},
+sop:{t:"工作內容及SOP",e:"SOP",d:"秘書工作項目與標準作業流程",tabs:{
+"工作內容":[["name","工作項目"],["freq","執行頻率（例如每週一、每月25日）"],["owner","對口／相關對象"],["detail","工作說明","area"],["note","備註","area"]],
+"SOP":[["name","SOP 名稱"],["scene","適用情境"],["steps","作業步驟","area"],["updated","最後更新日期","date"],["note","注意事項","area"]]}},
+rotary:{t:"台北創新網路扶輪社",e:"ROTARY",d:"財務SOP、社務SOP、扶少團",tabs:{"財務SOP":F2,"社務SOP":F2,"扶少團":[["name","名稱／姓名"],["role","職務／角色"],["school","學校／單位"],["phone","聯絡電話","tel"],["email","Email","email"],["note","備註","area"]]}}
+};
+var keys=Object.keys(SEC),cur="home",tab="全部",editId=null,data={contacts:[],personal:[],company:[],annual:[],sop:[],rotary:[]};
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+
+function renderNav(){
+ $("nav").innerHTML=[["home","總覽"]].concat(keys.map(function(k){return [k,SEC[k].t]})).map(function(p){
+  return '<button data-go="'+p[0]+'" class="'+(p[0]===cur?"on":"")+'">'+p[1]+'</button>'}).join("");
+}
+function home(){
+ $("main").innerHTML='<div class="eb">OVERVIEW</div><h1>行政秘書工作版</h1>'+remind()+'<div class="grid">'+keys.map(function(k){var s=SEC[k];
+  return '<button class="hc" data-go="'+k+'"><span class="eb">'+s.e+'</span><span class="ht">'+s.t+'</span><span class="hd">'+s.d+'</span><span class="hn">'+data[k].length+' <small>筆</small></span></button>'}).join("")+'</div>';
+}
+function nm(){var m=new Date().getMonth()+1;return [m,m%12+1]}
+function tagH(r){
+ if(cur==="annual"&&r.month){var x=nm(),t=r.month+"月",hot=false;
+  if(+r.month===x[1]){t+=" ・下月提醒";hot=true}else if(+r.month===x[0]){t+=" ・本月";hot=true}
+  return '<span class="tag'+(hot?' hot':'')+'">'+t+'</span>'}
+ return '<span class="tag">'+esc(r.cat)+'</span>';
+}
+function remind(){
+ var x=nm(),a=data.annual.filter(function(r){return +r.month===x[1]}),b=data.annual.filter(function(r){return +r.month===x[0]});
+ if(!a.length&&!b.length)return "";
+ function g(t,l){return l.length?'<div><div class="rt">'+t+'</div>'+l.map(function(r){return '<div class="ri"><span>'+esc(r.name)+'</span><span>'+esc(r.deadline||"")+'</span></div>'}).join("")+'</div>':""}
+ return '<div class="rm"><div class="eb">REMINDER</div>'+g("下個月（"+x[1]+"月）即將開始，請提前準備",a)+g("本月（"+x[0]+"月）進行中",b)+'<button data-go="annual">查看每年例行性工作</button></div>';
+}
+function sec(){
+ var s=SEC[cur];
+ $("main").innerHTML='<div class="eb">'+s.e+'</div><h1>'+s.t+'</h1><div class="top"><input id="q" type="search" placeholder="搜尋所有欄位…"><button class="pri" data-add="1" style="white-space:nowrap">＋ 新增</button></div><div class="tabs" id="tabs"></div><div class="cnt" id="cnt"></div><div class="cards" id="list"></div>';
+ $("q").oninput=list;tabs();list();
+}
+function tabs(){
+ if(Object.keys(SEC[cur].tabs).length<2){$("tabs").innerHTML="";return}
+ $("tabs").innerHTML=["全部"].concat(Object.keys(SEC[cur].tabs)).map(function(c){
+  return '<button data-tab="'+esc(c)+'" class="'+(c===tab?"on":"")+'">'+esc(c)+'</button>'}).join("");
+}
+function card(r){
+ var s=SEC[cur],names=Object.keys(s.tabs),fs=s.tabs[r.cat]||s.tabs[names[0]];
+ var h='<div class="card"><div class="hd2"><div class="name">'+esc(r.name)+'</div>'+tagH(r)+'</div>';
+ fs.slice(1).forEach(function(f){
+  var v=r[f[0]];if(!v)return;if(f[2]==="area"){if(f[0]!=="note")h+='<div class="note"><b>'+f[1]+'</b>'+esc(v)+'</div>';return}
+  var c=esc(v);if(f[2]==="month")c=c+"月";else if(f[2]==="tel")c='<a href="tel:'+c+'">'+c+'</a>';else if(f[2]==="email")c='<a href="mailto:'+c+'">'+c+'</a>';
+  h+='<div class="row"><b>'+f[1].replace(/（.*/,"")+'</b><span>'+c+'</span></div>'});
+ if(r.note)h+='<div class="note">'+esc(r.note)+'</div>';
+ return h+'<div class="acts"><button data-e="'+esc(r.id)+'">編輯</button><button class="del" data-d="'+esc(r.id)+'">刪除</button></div></div>';
+}
+function list(){
+ if(cur==="home")return;
+ var q=($("q").value||"").trim().toLowerCase();
+ var rows=data[cur].filter(function(r){
+  if(tab!=="全部"&&r.cat!==tab)return false;
+  return !q||Object.keys(r).some(function(k){return k!=="id"&&String(r[k]).toLowerCase().indexOf(q)>-1});
+ }).sort(function(a,b){if(SEC[cur].sort==="month")return (+a.month||99)-(+b.month||99);return String(a.name||"").localeCompare(String(b.name||""),"zh-Hant")});
+ $("cnt").textContent="共 "+rows.length+" 筆";
+ $("list").innerHTML=rows.length?rows.map(card).join(""):'<div class="empty">'+(data[cur].length?"找不到符合的資料":"尚無資料，點右上角「新增」開始建立")+'</div>';
+}
+function refresh(){if(cur==="home")home();else list()}
+function render(){renderNav();if(cur==="home")home();else sec()}
+
+function build(cat,v){
+ var s=SEC[cur],fs=s.tabs[cat];
+ $("fb").innerHTML='<h3>'+(editId?"編輯":"新增")+'</h3><label>類別<select id="fc">'+Object.keys(s.tabs).map(function(n){return '<option'+(n===cat?' selected':'')+'>'+esc(n)+'</option>'}).join("")+'</select></label>'+
+ fs.map(function(f){return '<label>'+f[1]+(f[2]==="month"?'<select id="f_'+f[0]+'"><option value="">請選擇</option>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(n){return '<option value="'+n+'"'+(String(v[f[0]])===String(n)?' selected':'')+'>'+n+'月</option>'}).join("")+'</select>':f[2]==="area"?'<textarea rows="'+(f[0]==="steps"?8:3)+'" id="f_'+f[0]+'">'+esc(v[f[0]])+'</textarea>':'<input id="f_'+f[0]+'" type="'+(f[2]||"text")+'" value="'+esc(v[f[0]])+'">')+'</label>'}).join("")+
+ '<div class="bar"><button id="cx">取消</button><button class="pri" id="sv">儲存</button></div>';
+}
+function collect(){
+ var cat=$("fc").value,o={cat:cat};
+ SEC[cur].tabs[cat].forEach(function(f){var e=$("f_"+f[0]);if(e)o[f[0]]=e.value.trim()});
+ return o;
+}
+function openForm(id){
+ editId=id||null;
+ var names=Object.keys(SEC[cur].tabs),r=id?data[cur].filter(function(x){return x.id===id})[0]:{cat:tab!=="全部"?tab:names[0]};
+ build(r.cat,r);$("dlg").showModal();
+}
+function save(){
+ var o=collect();
+ if(!o.name){alert("請輸入名稱");return}
+ if(cur==="annual"&&!o.month){alert("請選擇月份");return}
+ if(editId){data[cur]=data[cur].map(function(x){return x.id===editId?Object.assign({id:editId},o):x})}
+ else{o.id="c"+Date.now()+Math.floor(Math.random()*1000);data[cur].push(o)}
+ persist().then(refresh);$("dlg").close();
+}
+function del(id){
+ if(!confirm("確定要刪除這筆資料嗎？"))return;
+ data[cur]=data[cur].filter(function(x){return x.id!==id});persist().then(refresh);
+}
+
+document.addEventListener("click",function(e){
+ var t=e.target.closest("button");if(!t)return;
+ if(t.dataset.go){cur=t.dataset.go;tab="全部";render()}
+ else if(t.dataset.tab){tab=t.dataset.tab;tabs();list()}
+ else if(t.dataset.add)openForm();
+ else if(t.dataset.e)openForm(t.dataset.e);
+ else if(t.dataset.d)del(t.dataset.d);
+ else if(t.id==="cx")$("dlg").close();
+ else if(t.id==="sv")save();
+});
+$("fb").addEventListener("change",function(e){if(e.target.id==="fc"){var v=collect();build(e.target.value,v)}});
+
+
+/* ---------- encryption / lock ---------- */
+var KEY=null,SALT=null,LS="dash_secure_v1",LSP="dash_plain_v1",PBK=310000,IDLE_MS=10*60*1000,idleT=null,pending=null,fromRepo=false;
+var enc=new TextEncoder(),dec=new TextDecoder();
+function b64(buf){var a=new Uint8Array(buf),t="";for(var i=0;i<a.length;i++)t+=String.fromCharCode(a[i]);return btoa(t)}
+function ub64(t){var b=atob(t),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+function derive(pw,salt){
+ return crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveKey"]).then(function(m){
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:PBK,hash:"SHA-256"},m,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])});
+}
+function seal(){
+ var iv=crypto.getRandomValues(new Uint8Array(12));
+ return crypto.subtle.encrypt({name:"AES-GCM",iv:iv},KEY,enc.encode(JSON.stringify({v:1,data:data}))).then(function(ct){
+  return {v:1,salt:b64(SALT),iv:b64(iv),ct:b64(ct)}});
+}
+function decrypt(b,pw){
+ var salt=ub64(b.salt);
+ return derive(pw,salt).then(function(k){
+  return crypto.subtle.decrypt({name:"AES-GCM",iv:ub64(b.iv)},k,ub64(b.ct)).then(function(pt){
+   return {k:k,salt:salt,d:JSON.parse(dec.decode(pt)).data||{}}})});
+}
+function persist(){try{localStorage.setItem(LSP,JSON.stringify(data))}catch(e){alert("無法儲存到此瀏覽器")}return Promise.resolve()}
+function norm(a){return Array.isArray(a)?a.map(function(r,i){return Object.assign({id:"i"+Date.now()+"_"+i},r)}):[]}
+function loaded(d){
+ keys.forEach(function(k){data[k]=norm(d[k])});
+ document.body.classList.remove("locked");$("lock").innerHTML="";
+ cur="home";tab="全部";render();
+ $("st").textContent="資料儲存在此瀏覽器（未加密）";
+ startIdle();
+}
+function startIdle(){}
+["mousemove","keydown","click","touchstart"].forEach(function(ev){document.addEventListener(ev,function(){if(KEY)startIdle()},{passive:true})});
+function lock(){
+ clearTimeout(idleT);KEY=null;SALT=null;
+ keys.forEach(function(k){data[k]=[]});
+ $("main").innerHTML="";
+ ["dlg","sdlg"].forEach(function(i){try{$(i).close()}catch(e){}});
+ try{var raw=localStorage.getItem(LS);pending=raw?JSON.parse(raw):null}catch(e){pending=null}
+ showLock(pending?"unlock":"setup");
+}
+function showLock(mode){
+ document.body.classList.add("locked");
+ var h='<div class="lk"><h2>行政秘書工作版</h2>';
+ if(mode==="nocrypto")h+='<p>此瀏覽器無法使用加密功能。請改用 https 網址開啟，或更新瀏覽器。</p>';
+ else if(mode==="unlock")h+='<p>偵測到先前加密的資料。輸入一次密碼後會取消鎖定，之後不再需要密碼。</p><input type="password" id="pw" placeholder="密碼" autocomplete="current-password"><div id="lkmsg"></div><button class="pri" id="lk_go">解鎖</button>';
+ else h+='<p>首次使用，請設定密碼。密碼用來加密所有資料，忘記後無法復原。</p><input type="password" id="pw" placeholder="設定密碼（至少 10 個字元）" autocomplete="new-password"><input type="password" id="pw2" placeholder="再輸入一次密碼" autocomplete="new-password"><div id="lkmsg"></div><button class="pri" id="lk_new">建立密碼</button>';
+ $("lock").innerHTML=h+'</div>';
+ setTimeout(function(){if($("pw"))$("pw").focus()},50);
+}
+function doUnlock(){
+ var pw=$("pw").value;if(!pw||!pending)return;
+ $("lkmsg").textContent="驗證中…";
+ decrypt(pending,pw).then(function(r){loaded(r.d);return persist()}).then(function(){try{localStorage.removeItem(LS)}catch(e){}}).catch(function(){$("lkmsg").textContent="密碼錯誤，或資料檔已損毀"});
+}
+function doSetup(){
+ var p1=$("pw").value,p2=$("pw2").value;
+ if(p1.length<10){$("lkmsg").textContent="密碼至少需要 10 個字元";return}
+ if(p1!==p2){$("lkmsg").textContent="兩次輸入的密碼不一致";return}
+ $("lkmsg").textContent="建立中…";
+ SALT=crypto.getRandomValues(new Uint8Array(16));
+ derive(p1,SALT).then(function(k){KEY=k;keys.forEach(function(x){data[x]=[]});return persist()}).then(function(){loaded({})});
+}
+function dl(name,obj){
+ var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(obj)],{type:"application/json"}));
+ a.download=name;document.body.appendChild(a);a.click();a.remove();
+}
+function importObj(obj){
+ var p;
+ if(obj&&obj.ct){var pw=prompt("請輸入這個備份檔的密碼");if(!pw)return;p=decrypt(obj,pw).then(function(r){return r.d})}
+ else p=Promise.resolve(obj&&obj.data?obj.data:obj);
+ p.then(function(d){
+  if(!confirm("匯入會覆蓋目前的所有資料，確定嗎？"))return;
+  keys.forEach(function(k){data[k]=norm(d[k])});
+  return persist().then(function(){refresh();$("sdlg").close();alert("匯入完成")});
+ }).catch(function(){alert("匯入失敗：密碼錯誤或檔案格式不正確")});
+}
+function openSettings(){
+ $("sfb").innerHTML='<h3>設定</h3><div class="sset"><b>備份與同步</b><p>匯出的檔案為明文 JSON，內含所有資料，請妥善保管。</p><button id="s_exp">匯出備份</button><label>匯入備份檔（加密檔或 JSON）<input type="file" id="s_file" accept=".json,application/json"></label></div>'+
+ '<div class="sset"><b>清除</b><button class="del" id="s_wipe">清除此瀏覽器上的所有資料</button></div><div class="bar"><button id="s_close">關閉</button></div>';
+ $("sdlg").showModal();
+}
+document.addEventListener("click",function(e){
+ var t=e.target.closest("button");if(!t)return;
+ var id=t.id;
+ if(id==="lk_go")doUnlock();
+ else if(id==="lk_new")doSetup();
+ else if(id==="bset")openSettings();
+ else if(id==="block")lock();
+ else if(id==="s_close")$("sdlg").close();
+ else if(id==="s_exp")dl("address-data.json",{v:1,data:data});
+
+ else if(id==="s_pw"){
+  var p1=$("s_p1").value,p2=$("s_p2").value;
+  if(p1.length<10){alert("密碼至少需要 10 個字元");return}
+  if(p1!==p2){alert("兩次輸入的密碼不一致");return}
+  var ns=crypto.getRandomValues(new Uint8Array(16));
+  derive(p1,ns).then(function(k){KEY=k;SALT=ns;return persist()}).then(function(){$("sdlg").close();alert("密碼已變更。之前匯出的備份檔仍使用舊密碼。")});
+ }
+ else if(id==="s_wipe"){
+  if(confirm("將刪除此瀏覽器上的所有資料且無法復原（不影響已匯出的備份檔），確定嗎？")){try{localStorage.removeItem(LS);localStorage.removeItem(LSP)}catch(x){}location.reload()}
+ }
+});
+document.addEventListener("change",function(e){
+ if(e.target.id==="s_file"&&e.target.files[0]){
+  var r=new FileReader();
+  r.onload=function(){try{importObj(JSON.parse(r.result))}catch(x){alert("檔案格式不正確")}};
+  r.readAsText(e.target.files[0]);
+ }
+});
+$("lock").addEventListener("keydown",function(e){
+ if(e.key==="Enter"){var b=$("lk_go")||$("lk_new");if(b)b.click()}
+});
+
+(function boot(){
+ var plain=null,raw=null;
+ try{plain=localStorage.getItem(LSP);raw=localStorage.getItem(LS)}catch(e){}
+ if(plain){try{loaded(JSON.parse(plain));return}catch(e){}}
+ if(raw&&window.crypto&&crypto.subtle){try{pending=JSON.parse(raw);showLock("unlock");return}catch(e){}}
+ loaded({});
+})();
+})();
+</script>
+</body>
+</html>
