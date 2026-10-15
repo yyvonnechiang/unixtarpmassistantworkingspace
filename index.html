@@ -62,19 +62,19 @@ body.locked header,body.locked main,body.locked #stw{display:none}
 body.locked #lock{display:grid}
 #lock{min-height:100vh;place-items:center;background:var(--nav);padding:20px}
 .lk{background:var(--card);color:var(--tx);border-radius:10px;padding:28px;width:min(400px,100%);display:grid;gap:12px}
-.lk h2{margin:0}
-.lk p{margin:0;color:var(--mut);font-size:.88rem}
-#lkmsg{color:var(--danger);font-size:.88rem;min-height:1.2em}
-.hbtn{margin-left:auto;display:flex;gap:8px}
+.lk h2{margin:0}.lk p{margin:0;color:var(--mut);font-size:.88rem}
+.msg{color:var(--danger);font-size:.88rem;min-height:1.2em}
+.hbtn{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .hbtn button{background:none;color:#a9b9d6;border-color:#2c4a7c;padding:6px 12px}
 .sset{display:grid;gap:8px;border-top:1px solid var(--bd);padding-top:12px}
 .sset p{margin:0;color:var(--mut);font-size:.84rem}
+body.ro .acts,body.ro [data-add],body.ro #bexp,body.ro #bset{display:none}
 #st{color:var(--mut);font-size:.78rem;margin-top:16px}
 </style>
 </head>
-<body class="locked">
+<body class="locked ro">
 <div id="lock"></div>
-<header><div class="brand">行政秘書工作版<small>EXECUTIVE ASSISTANT</small></div><nav id="nav"></nav><div class="hbtn"><button id="bset">設定</button></div></header>
+<header><div class="brand">行政秘書工作版<small>EXECUTIVE ASSISTANT</small></div><nav id="nav"></nav><div class="hbtn"><button id="bedit">編輯模式</button><button id="bexp">匯出發佈檔</button><button id="bset">設定</button><button id="block">鎖定</button></div></header>
 <main id="main"></main>
 <dialog id="dlg"><div class="f" id="fb"></div></dialog>
 <dialog id="sdlg"><div class="f" id="sfb"></div></dialog>
@@ -167,12 +167,13 @@ function collect(){
  SEC[cur].tabs[cat].forEach(function(f){var e=$("f_"+f[0]);if(e)o[f[0]]=e.value.trim()});
  return o;
 }
-function openForm(id){
+function openForm(id){if(!editing)return;
  editId=id||null;
  var names=Object.keys(SEC[cur].tabs),r=id?data[cur].filter(function(x){return x.id===id})[0]:{cat:tab!=="全部"?tab:names[0]};
  build(r.cat,r);$("dlg").showModal();
 }
 function save(){
+ if(!editing)return;
  var o=collect();
  if(!o.name){alert("請輸入名稱");return}
  if(cur==="annual"&&!o.month){alert("請選擇月份");return}
@@ -181,6 +182,7 @@ function save(){
  persist().then(refresh);$("dlg").close();
 }
 function del(id){
+ if(!editing)return;
  if(!confirm("確定要刪除這筆資料嗎？"))return;
  data[cur]=data[cur].filter(function(x){return x.id!==id});persist().then(refresh);
 }
@@ -198,8 +200,8 @@ document.addEventListener("click",function(e){
 $("fb").addEventListener("change",function(e){if(e.target.id==="fc"){var v=collect();build(e.target.value,v)}});
 
 
-/* ---------- encryption / lock ---------- */
-var KEY=null,SALT=null,LS="dash_secure_v1",LSP="dash_plain_v1",PBK=310000,IDLE_MS=10*60*1000,idleT=null,pending=null,fromRepo=false;
+/* ---------- encryption / roles ---------- */
+var KEY=null,SALT=null,EDIT=null,editing=false,LSD="dash_draft_v1",PBK=310000,IDLE_MS=10*60*1000,idleT=null,pending=null,repoBlob=null,pendingIsDraft=false;
 var enc=new TextEncoder(),dec=new TextDecoder();
 function b64(buf){var a=new Uint8Array(buf),t="";for(var i=0;i<a.length;i++)t+=String.fromCharCode(a[i]);return btoa(t)}
 function ub64(t){var b=atob(t),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
@@ -207,65 +209,98 @@ function derive(pw,salt){
  return crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveKey"]).then(function(m){
   return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:PBK,hash:"SHA-256"},m,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])});
 }
+function hashCode(code,salt){
+ return crypto.subtle.importKey("raw",enc.encode(code),"PBKDF2",false,["deriveBits"]).then(function(m){
+  return crypto.subtle.deriveBits({name:"PBKDF2",salt:salt,iterations:PBK,hash:"SHA-256"},m,256)}).then(b64);
+}
 function seal(){
  var iv=crypto.getRandomValues(new Uint8Array(12));
- return crypto.subtle.encrypt({name:"AES-GCM",iv:iv},KEY,enc.encode(JSON.stringify({v:1,data:data}))).then(function(ct){
-  return {v:1,salt:b64(SALT),iv:b64(iv),ct:b64(ct)}});
+ return crypto.subtle.encrypt({name:"AES-GCM",iv:iv},KEY,enc.encode(JSON.stringify({v:2,data:data,edit:EDIT}))).then(function(ct){
+  return {v:2,salt:b64(SALT),iv:b64(iv),ct:b64(ct)}});
 }
 function decrypt(b,pw){
  var salt=ub64(b.salt);
  return derive(pw,salt).then(function(k){
   return crypto.subtle.decrypt({name:"AES-GCM",iv:ub64(b.iv)},k,ub64(b.ct)).then(function(pt){
-   return {k:k,salt:salt,d:JSON.parse(dec.decode(pt)).data||{}}})});
+   var p=JSON.parse(dec.decode(pt));return {k:k,salt:salt,d:p.data||{},edit:p.edit||null}})});
 }
-function persist(){try{localStorage.setItem(LSP,JSON.stringify(data))}catch(e){alert("無法儲存到此瀏覽器")}return Promise.resolve()}
+function getDraft(){try{var r=localStorage.getItem(LSD);return r?JSON.parse(r):null}catch(e){return null}}
+function persist(){
+ if(!KEY||!editing)return Promise.resolve();
+ return seal().then(function(b){try{localStorage.setItem(LSD,JSON.stringify(b))}catch(e){alert("無法儲存草稿到此瀏覽器")}});
+}
 function norm(a){return Array.isArray(a)?a.map(function(r,i){return Object.assign({id:"i"+Date.now()+"_"+i},r)}):[]}
+function setMode(on){
+ editing=on;document.body.classList.toggle("ro",!on);
+ $("bedit").textContent=on?"結束編輯":"編輯模式";
+ $("st").textContent=on?"編輯模式：修改後請按「匯出發佈檔」並上傳到 GitHub，其他人才會看到":"唯讀模式：資料已加密，閒置 10 分鐘會自動鎖定";
+ if(cur!=="home"&&$("list"))list();
+}
 function loaded(d){
  keys.forEach(function(k){data[k]=norm(d[k])});
  document.body.classList.remove("locked");$("lock").innerHTML="";
- cur="home";tab="全部";render();
- $("st").textContent="資料儲存在此瀏覽器（未加密）";
- startIdle();
+ cur="home";tab="全部";render();setMode(false);startIdle();
 }
-function startIdle(){}
+function startIdle(){clearTimeout(idleT);idleT=setTimeout(lock,IDLE_MS)}
 ["mousemove","keydown","click","touchstart"].forEach(function(ev){document.addEventListener(ev,function(){if(KEY)startIdle()},{passive:true})});
 function lock(){
- clearTimeout(idleT);KEY=null;SALT=null;
+ clearTimeout(idleT);KEY=null;SALT=null;EDIT=null;editing=false;
  keys.forEach(function(k){data[k]=[]});
  $("main").innerHTML="";
  ["dlg","sdlg"].forEach(function(i){try{$(i).close()}catch(e){}});
- try{var raw=localStorage.getItem(LS);pending=raw?JSON.parse(raw):null}catch(e){pending=null}
- showLock(pending?"unlock":"setup");
+ var dr=getDraft();
+ if(repoBlob){pending=repoBlob;pendingIsDraft=false;showLock("unlock")}
+ else if(dr){pending=dr;pendingIsDraft=true;showLock("unlock")}
+ else showLock("setup");
 }
 function showLock(mode){
  document.body.classList.add("locked");
  var h='<div class="lk"><h2>行政秘書工作版</h2>';
  if(mode==="nocrypto")h+='<p>此瀏覽器無法使用加密功能。請改用 https 網址開啟，或更新瀏覽器。</p>';
- else if(mode==="unlock")h+='<p>偵測到先前加密的資料。輸入一次密碼後會取消鎖定，之後不再需要密碼。</p><input type="password" id="pw" placeholder="密碼" autocomplete="current-password"><div id="lkmsg"></div><button class="pri" id="lk_go">解鎖</button>';
- else h+='<p>首次使用，請設定密碼。密碼用來加密所有資料，忘記後無法復原。</p><input type="password" id="pw" placeholder="設定密碼（至少 10 個字元）" autocomplete="new-password"><input type="password" id="pw2" placeholder="再輸入一次密碼" autocomplete="new-password"><div id="lkmsg"></div><button class="pri" id="lk_new">建立密碼</button>';
+ else if(mode==="unlock")h+='<p>請輸入查看密碼。</p><input type="password" id="pw" placeholder="查看密碼" autocomplete="current-password"><div class="msg" id="lkmsg"></div><button class="pri" id="lk_go">解鎖</button>';
+ else h+='<p>首次使用，請設定兩組密碼。查看密碼用來解鎖並查看資料；編輯碼用來開啟編輯模式。忘記後無法復原。</p><input type="password" id="pw" placeholder="查看密碼（至少 10 個字元）" autocomplete="new-password"><input type="password" id="pw2" placeholder="再輸入一次查看密碼" autocomplete="new-password"><input type="password" id="ec1" placeholder="編輯碼（至少 8 個字元）" autocomplete="new-password"><input type="password" id="ec2" placeholder="再輸入一次編輯碼" autocomplete="new-password"><div class="msg" id="lkmsg"></div><button class="pri" id="lk_new">建立</button>';
  $("lock").innerHTML=h+'</div>';
  setTimeout(function(){if($("pw"))$("pw").focus()},50);
 }
 function doUnlock(){
  var pw=$("pw").value;if(!pw||!pending)return;
  $("lkmsg").textContent="驗證中…";
- decrypt(pending,pw).then(function(r){loaded(r.d);return persist()}).then(function(){try{localStorage.removeItem(LS)}catch(e){}}).catch(function(){$("lkmsg").textContent="密碼錯誤，或資料檔已損毀"});
+ decrypt(pending,pw).then(function(r){
+  var dr=pendingIsDraft?null:getDraft();
+  if(dr)return decrypt(dr,pw).then(function(x){return {r:r,x:x}},function(){return {r:r,x:null}});
+  return {r:r,x:null};
+ }).then(function(o){
+  var use=o.r;
+  if(o.x&&confirm("發現尚未發佈的編輯草稿，要載入嗎？（取消則使用儲存庫版本）"))use=o.x;
+  KEY=use.k;SALT=use.salt;EDIT=use.edit||o.r.edit;loaded(use.d);
+ }).catch(function(){$("lkmsg").textContent="密碼錯誤，或資料檔已損毀"});
 }
 function doSetup(){
- var p1=$("pw").value,p2=$("pw2").value;
- if(p1.length<10){$("lkmsg").textContent="密碼至少需要 10 個字元";return}
- if(p1!==p2){$("lkmsg").textContent="兩次輸入的密碼不一致";return}
+ var p1=$("pw").value,p2=$("pw2").value,c1=$("ec1").value,c2=$("ec2").value;
+ if(p1.length<10){$("lkmsg").textContent="查看密碼至少需要 10 個字元";return}
+ if(p1!==p2){$("lkmsg").textContent="兩次輸入的查看密碼不一致";return}
+ if(c1.length<8){$("lkmsg").textContent="編輯碼至少需要 8 個字元";return}
+ if(c1!==c2){$("lkmsg").textContent="兩次輸入的編輯碼不一致";return}
  $("lkmsg").textContent="建立中…";
  SALT=crypto.getRandomValues(new Uint8Array(16));
- derive(p1,SALT).then(function(k){KEY=k;keys.forEach(function(x){data[x]=[]});return persist()}).then(function(){loaded({})});
+ var es=crypto.getRandomValues(new Uint8Array(16));
+ Promise.all([derive(p1,SALT),hashCode(c1,es)]).then(function(r){
+  KEY=r[0];EDIT={salt:b64(es),hash:r[1]};keys.forEach(function(x){data[x]=[]});
+  loaded({});setMode(true);return persist();
+ });
 }
 function dl(name,obj){
  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(obj)],{type:"application/json"}));
  a.download=name;document.body.appendChild(a);a.click();a.remove();
 }
+function askEdit(){
+ if(!EDIT){setMode(true);return}
+ $("sfb").innerHTML='<h3>輸入編輯碼</h3><input type="password" id="ec" autocomplete="off"><div class="msg" id="ecmsg"></div><div class="bar"><button id="ec_x">取消</button><button class="pri" id="ec_ok">確定</button></div>';
+ $("sdlg").showModal();setTimeout(function(){$("ec").focus()},50);
+}
 function importObj(obj){
  var p;
- if(obj&&obj.ct){var pw=prompt("請輸入這個備份檔的密碼");if(!pw)return;p=decrypt(obj,pw).then(function(r){return r.d})}
+ if(obj&&obj.ct){var pw=prompt("請輸入這個備份檔的查看密碼");if(!pw)return;p=decrypt(obj,pw).then(function(r){return r.d})}
  else p=Promise.resolve(obj&&obj.data?obj.data:obj);
  p.then(function(d){
   if(!confirm("匯入會覆蓋目前的所有資料，確定嗎？"))return;
@@ -274,8 +309,11 @@ function importObj(obj){
  }).catch(function(){alert("匯入失敗：密碼錯誤或檔案格式不正確")});
 }
 function openSettings(){
- $("sfb").innerHTML='<h3>設定</h3><div class="sset"><b>備份與同步</b><p>匯出的檔案為明文 JSON，內含所有資料，請妥善保管。</p><button id="s_exp">匯出備份</button><label>匯入備份檔（加密檔或 JSON）<input type="file" id="s_file" accept=".json,application/json"></label></div>'+
- '<div class="sset"><b>清除</b><button class="del" id="s_wipe">清除此瀏覽器上的所有資料</button></div><div class="bar"><button id="s_close">關閉</button></div>';
+ if(!editing)return;
+ $("sfb").innerHTML='<h3>設定</h3><div class="sset"><b>匯入資料</b><p>可匯入加密檔（需密碼）或 JSON，會覆蓋目前所有資料。</p><input type="file" id="s_file" accept=".json,application/json"></div>'+
+ '<div class="sset"><b>變更查看密碼</b><input type="password" id="s_p1" placeholder="新查看密碼（至少 10 個字元）" autocomplete="new-password"><input type="password" id="s_p2" placeholder="再輸入一次" autocomplete="new-password"><button id="s_vp">變更查看密碼</button></div>'+
+ '<div class="sset"><b>變更編輯碼</b><input type="password" id="s_c1" placeholder="新編輯碼（至少 8 個字元）" autocomplete="new-password"><input type="password" id="s_c2" placeholder="再輸入一次" autocomplete="new-password"><button id="s_ec">變更編輯碼</button></div>'+
+ '<div class="sset"><b>草稿</b><p>編輯中的內容會以加密形式暫存在此瀏覽器，發佈後可清除。</p><button class="del" id="s_wipe">清除此瀏覽器上的草稿</button></div><div class="bar"><button id="s_close">關閉</button></div>';
  $("sdlg").showModal();
 }
 document.addEventListener("click",function(e){
@@ -283,20 +321,30 @@ document.addEventListener("click",function(e){
  var id=t.id;
  if(id==="lk_go")doUnlock();
  else if(id==="lk_new")doSetup();
+ else if(id==="bedit"){if(editing)setMode(false);else askEdit()}
+ else if(id==="bexp"){if(editing)seal().then(function(b){dl("data.enc.json",b);alert("已下載 data.enc.json。請上傳到 GitHub 儲存庫並覆蓋舊檔，發佈完成後其他人重新整理才會看到。")})}
  else if(id==="bset")openSettings();
  else if(id==="block")lock();
- else if(id==="s_close")$("sdlg").close();
- else if(id==="s_exp")dl("address-data.json",{v:1,data:data});
-
- else if(id==="s_pw"){
+ else if(id==="s_close"||id==="ec_x")$("sdlg").close();
+ else if(id==="ec_ok"){
+  hashCode($("ec").value,ub64(EDIT.salt)).then(function(h){if(h===EDIT.hash){$("sdlg").close();setMode(true)}else $("ecmsg").textContent="編輯碼錯誤"});
+ }
+ else if(id==="s_vp"){
   var p1=$("s_p1").value,p2=$("s_p2").value;
-  if(p1.length<10){alert("密碼至少需要 10 個字元");return}
+  if(p1.length<10){alert("查看密碼至少需要 10 個字元");return}
   if(p1!==p2){alert("兩次輸入的密碼不一致");return}
   var ns=crypto.getRandomValues(new Uint8Array(16));
-  derive(p1,ns).then(function(k){KEY=k;SALT=ns;return persist()}).then(function(){$("sdlg").close();alert("密碼已變更。之前匯出的備份檔仍使用舊密碼。")});
+  derive(p1,ns).then(function(k){KEY=k;SALT=ns;return persist()}).then(function(){$("sdlg").close();alert("查看密碼已變更。請重新匯出發佈檔並上傳到儲存庫才會生效。")});
+ }
+ else if(id==="s_ec"){
+  var c1=$("s_c1").value,c2=$("s_c2").value;
+  if(c1.length<8){alert("編輯碼至少需要 8 個字元");return}
+  if(c1!==c2){alert("兩次輸入的編輯碼不一致");return}
+  var es=crypto.getRandomValues(new Uint8Array(16));
+  hashCode(c1,es).then(function(h){EDIT={salt:b64(es),hash:h};return persist()}).then(function(){$("sdlg").close();alert("編輯碼已變更。請重新匯出發佈檔並上傳到儲存庫才會生效。")});
  }
  else if(id==="s_wipe"){
-  if(confirm("將刪除此瀏覽器上的所有資料且無法復原（不影響已匯出的備份檔），確定嗎？")){try{localStorage.removeItem(LS);localStorage.removeItem(LSP)}catch(x){}location.reload()}
+  if(confirm("將刪除此瀏覽器上尚未發佈的草稿且無法復原（不影響已匯出的檔案），確定嗎？")){try{localStorage.removeItem(LSD)}catch(x){}location.reload()}
  }
 });
 document.addEventListener("change",function(e){
@@ -306,16 +354,16 @@ document.addEventListener("change",function(e){
   r.readAsText(e.target.files[0]);
  }
 });
-$("lock").addEventListener("keydown",function(e){
- if(e.key==="Enter"){var b=$("lk_go")||$("lk_new");if(b)b.click()}
-});
+$("lock").addEventListener("keydown",function(e){if(e.key==="Enter"){var b=$("lk_go")||$("lk_new");if(b)b.click()}});
 
 (function boot(){
- var plain=null,raw=null;
- try{plain=localStorage.getItem(LSP);raw=localStorage.getItem(LS)}catch(e){}
- if(plain){try{loaded(JSON.parse(plain));return}catch(e){}}
- if(raw&&window.crypto&&crypto.subtle){try{pending=JSON.parse(raw);showLock("unlock");return}catch(e){}}
- loaded({});
+ if(!(window.crypto&&crypto.subtle)){showLock("nocrypto");return}
+ fetch("data.enc.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(b){
+  if(!b||!b.ct)throw 0;repoBlob=b;pending=b;showLock("unlock")
+ }).catch(function(){
+  var dr=getDraft();
+  if(dr){pending=dr;pendingIsDraft=true;showLock("unlock")}else showLock("setup");
+ });
 })();
 })();
 </script>
